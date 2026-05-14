@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>The Old Pond</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <button class="brand" id="homeNavBtn" type="button">THE OLD POND</button>
+    <nav class="topbar-menu" aria-label="Primary">
+      <button class="menu-link" id="creatorNavBtn" type="button">Enter the pond</button>
+      <button class="menu-link" id="archiveNavBtn" type="button">Archive</button>
+      <button class="menu-link" id="projectNavBtn" type="button">The Project</button>
+    </nav>
+  </header>
+
+  <main class="home" id="homeView" aria-labelledby="homeTitle">
+    <section class="home-card">
+      <h1 class="home-title" id="homeTitle">THE OLD POND</h1>
+
+      <div class="haiku">
+        <p>An old silent pond,</p>
+        <p>A frog jumps into the pond -</p>
+        <p>SPLASH! Silence again.</p>
+      </div>
+
+      <p class="poem-credit">POEM BY MATSUO BASHO</p>
+
+      <p class="home-line">
+        WE RARELY KNOW HOW ANOTHER PERSON IMAGINES A POEM.
+      </p>
+
+      <p class="home-copy">
+        THIS PROJECT INVITES YOU TO CONSTRUCT YOUR OWN INTERPRETATION<br>
+        OF BASHO'S HAIKU USING A SHARED VISUAL LANGUAGE.
+      </p>
+
+      <button class="btn" id="enterPondBtn" type="button">ENTER THE POND</button>
+    </section>
+  </main> 
+
+  <main class="project-page" id="projectView" hidden>
+    <article class="project-copy" aria-labelledby="projectTitle">
+      <h1 id="projectTitle">The Project</h1>
+      <p class="project-kicker">We rarely know how another person imagines a poem.</p>
+      <p>
+A few lines of text can create completely different scenes in different minds. Some people imagine darkness, others sunlight. Some imagine movement, insects, wind, cold air, deep water, or silence. Even when reading the same words, no two people picture exactly the same thing.
+Most of these imagined images disappear the moment we finish reading.
+<br><br>
+This project explores what happens when those private interpretations are collected, visualised, and shared.
+      </p>
+
+      <h2>THE OLD POND</h2>
+      <div class="haiku">
+        <p>An old silent pond,</p>
+        <p>A frog jumps into the pond -</p>
+        <p>SPLASH! Silence again.</p>
+      </div>
+     <p class="poem-credit">POEM BY MATSUO BASHO</p>
+
+
+      <p> 
+
+Although the haiku is short, it leaves large gaps for imagination. Bashō provides very little visual information, allowing readers to construct the atmosphere, movement, environment, and emotion of the scene themselves.
+this project explores the space between reading and imagining. 
+<br><br>
+This platform invites users to build their own interpretation of the poem using a shared library of illustrated and animated elements, treating perception as something active, unstable, and continuously changing.
+      </p>
+
+      <h2>PARTICIPATION</h2>
+      <p>
+        This project has been influenced by participatory web environments and collaborative digital spaces where users collectively shape the outcome of a work over time.
+The platform is intended to be exploratory, playful, and reflective. There is no correct way to build a scene. 
+<br><br>
+Some users may focus on realism, others atmosphere, abstraction, movement, rhythm, or emotion.
+OUR archive is less about a single poem, and more about the collective process of imagining.
+
+      </p>
+    </article>
+  </main>
+
+  <main class="app-container" id="createView" hidden>
+    <div class="content-wrapper">
+      <div class="left-panel">
+        <div class="haiku-text">
+          <p id="haikuLine1">An old silent pond,</p>
+          <p id="haikuLine2">A frog jumps into the pond --</p>
+          <p id="haikuLine3">SPLASH! Silence again.</p>
+        </div>
+      </div>
+
+      <section class="workspace-panel" aria-label="Stamp scene builder">
+        <div class="toolbar">
+          <div id="assetContainer" class="asset-grid">
+            <!-- Assets will be generated here -->
+          </div>
+        </div>
+
+        <div id="canvas" class="canvas-area" tabindex="-1">
+          <svg id="waterLayer" class="water-layer" aria-hidden="true"></svg>
+          <p class="canvas-placeholder">Drag images to make a scene</p>
+        </div>
+
+        <div class="scene-actions" aria-label="Scene actions">
+          <button class="btn" id="publishSceneBtn" type="button">Publish scene</button>
+          <button class="btn danger" id="clearSceneBtn" type="button">Clear scene</button>
+          <p class="save-status" id="saveStatus" aria-live="polite"></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <section class="archive-section" id="archiveView" hidden aria-labelledby="archiveTitle">
+    <div class="archive-inner">
+      <h1 class="archive-title" id="archiveTitle">Archive</h1>
+      <p class="archive-status" id="archiveStatus">Loading archive...</p>
+      <div class="archive-grid" id="archiveGrid"></div>
+    </div>
+  </section>
+
+  <div class="modal hidden" id="archiveModal" role="dialog" aria-modal="true" aria-labelledby="archiveModalTitle">
+    <div class="modal-backdrop" id="archiveModalBackdrop"></div>
+    <article class="modal-card archive-modal-card">
+      <button class="modal-close" id="archiveModalClose" type="button" aria-label="Close archive scene">x</button>
+      <div class="archive-modal-body">
+        <div class="archive-scene-large" id="archiveModalScene"></div>
+        <div class="archive-modal-copy">
+          <h1 id="archiveModalTitle">Archived pond</h1>
+          <div class="archive-modal-poem" id="archiveModalPoem"></div>
+          <p class="archive-modal-date" id="archiveModalDate"></p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="modal hidden" id="publishModal" role="dialog" aria-modal="true" aria-labelledby="publishModalTitle">
+    <div class="modal-backdrop" id="publishModalBackdrop"></div>
+    <form class="modal-card publish-modal-card" id="publishForm">
+      <button class="modal-close" id="publishModalClose" type="button" aria-label="Close publish scene">x</button>
+      <h1 id="publishModalTitle">Enter your name</h1>
+      <label class="publish-label" for="sceneTitleInput">Name</label>
+      <input class="publish-input" id="sceneTitleInput" name="sceneTitle" type="text" autocomplete="off" required>
+      <div class="publish-actions">
+        <button class="btn" type="submit">OK</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <script src="./js/firebase-config.js"></script>
+  <script src="./js/storage.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
