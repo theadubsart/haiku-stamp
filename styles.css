@@ -574,6 +574,23 @@ textarea{
   text-align: left;
 }
 
+.archive-modal-actions{
+  margin-top: 18px;
+}
+
+.share-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.share-btn.copied{
+  transform: translateY(-2px) scale(0.99);
+  background-color: #dff4ea;
+}
+
+
 .archive-modal-copy h1{
   margin: 0 0 20px;
   font-size: 28px;

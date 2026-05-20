@@ -139,6 +139,7 @@ class OldPondApp {
     this.archiveModalDate = document.getElementById('archiveModalDate');
     this.archiveModalClose = document.getElementById('archiveModalClose');
     this.archiveModalBackdrop = document.getElementById('archiveModalBackdrop');
+    this.archiveShareBtn = document.getElementById('archiveShareBtn');
     this.publishModal = document.getElementById('publishModal');
     this.publishForm = document.getElementById('publishForm');
     this.sceneTitleInput = document.getElementById('sceneTitleInput');
@@ -250,6 +251,35 @@ class OldPondApp {
   bindArchiveModal() {
     this.archiveModalClose?.addEventListener('click', () => this.closeArchiveModal());
     this.archiveModalBackdrop?.addEventListener('click', () => this.closeArchiveModal());
+    this.archiveShareBtn?.addEventListener('click', async () => {
+      if (!this.currentArchiveEntry) return;
+      const id = this.currentArchiveEntry.id || this.currentArchiveEntry;
+      const url = `${location.origin}${location.pathname}?scene=${encodeURIComponent(id)}`;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const input = document.createElement('input');
+          input.style.position = 'fixed';
+          input.style.opacity = '0';
+          input.value = url;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          input.remove();
+        }
+        const btn = this.archiveShareBtn;
+        const original = btn.textContent;
+        btn.textContent = 'Link copied';
+        btn.classList.add('copied');
+        window.setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1400);
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+    });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') this.closeArchiveModal();
     });
@@ -745,7 +775,7 @@ class OldPondApp {
 
   openArchiveModal(entry, index) {
     if (!this.archiveModal) return;
-
+    this.currentArchiveEntry = entry;
     this.archiveModalTitle.textContent = entry.title || `Pond ${index + 1}`;
     this.archiveModalPoem.innerHTML = '';
     (entry.poem || []).forEach((line) => {
@@ -757,6 +787,10 @@ class OldPondApp {
     this.archiveModalScene.innerHTML = '';
     this.renderScenePreview(this.archiveModalScene, entry.scene, true);
     this.archiveModal.classList.remove('hidden');
+    if (this.archiveShareBtn) {
+      this.archiveShareBtn.textContent = 'Share';
+      this.archiveShareBtn.classList.remove('copied');
+    }
   }
 
   closeArchiveModal() {
