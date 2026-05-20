@@ -26,7 +26,7 @@ const DEFAULT_SCENE_BACKGROUND = '#efefe8';
 const BACKGROUND_RULES = [
   { keywords: ['moon'], color: '#151B36' },
   { keywords: ['grey'], color: '#A5A5A5' },
-  { keywords: ['autumn'], color: '#E26500' },
+  { keywords: ['autumn'], color: '#f79546' },
   { keywords: ['sky'], color: '#3F4972' },
   { keywords: ['morning'], color: '#5EA0E6' },
   { keywords: ['hot', 'scalding'], color: '#D7C500' },
