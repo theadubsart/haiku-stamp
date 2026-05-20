@@ -162,6 +162,7 @@ class OldPondApp {
     this.activeTool = null;
     this.drawingWater = null;
     this.phraseSelections = new Map();
+    this.userSceneColorSeed = this.getSceneColorSeed();
 
     this.init();
   }
@@ -735,6 +736,7 @@ class OldPondApp {
     return {
       width,
       height,
+      backgroundSeed: this.userSceneColorSeed,
       items: this.canvasItems.map((item) => ({
         type: item.type,
         x: (parseFloat(item.element.style.left) || 0) / width,
@@ -1070,17 +1072,18 @@ class OldPondApp {
     return (scene.items || []).some((item) => item.type === 'rain');
   }
 
-  getSceneBackground(lines, counts = {}) {
+  getSceneBackground(lines, counts = {}, seed = this.userSceneColorSeed) {
+    const text = `${lines.join(' ')} ${Object.keys(counts).filter((type) => counts[type] > 0).join(' ')}`.toLowerCase();
+
     if (counts.sun && counts.moon) {
-      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f']);
+      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f'].map((color) => this.stablePerturbColor(color, seed, 0.08)));
     }
 
-    const text = `${lines.join(' ')} ${Object.keys(counts).filter((type) => counts[type] > 0).join(' ')}`.toLowerCase();
     const colors = BACKGROUND_RULES
       .filter((rule) => rule.keywords.some((keyword) => text.includes(keyword)))
       .map((rule) => rule.color);
 
-    return this.createSceneColor(colors);
+    return this.createSceneColor(colors, seed);
   }
 
   getSceneBackgroundForScene(scene) {
@@ -1089,8 +1092,10 @@ class OldPondApp {
       return total;
     }, {});
 
+    const seed = scene.backgroundSeed || this.userSceneColorSeed;
+
     if (counts.sun && counts.moon) {
-      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f']);
+      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f'].map((color) => this.stablePerturbColor(color, seed, 0.08)));
     }
 
     const words = [];
@@ -1105,25 +1110,55 @@ class OldPondApp {
     if (counts.rain) words.push('rain');
     if (counts.fog) words.push('fog');
 
-    return this.getSceneBackground(words, counts);
+    return this.getSceneBackground(words, counts, seed);
   }
 
-  createSceneColor(colors) {
+  createSceneColor(colors, seed) {
     const uniqueColors = [...new Set(colors)];
+    const stableSeed = seed || this.userSceneColorSeed;
 
-    if (!uniqueColors.length) return this.perturbColor(DEFAULT_SCENE_BACKGROUND);
-    return this.mixColors(uniqueColors.map((color) => this.perturbColor(color, 0.08)));
+    if (!uniqueColors.length) return this.stablePerturbColor(DEFAULT_SCENE_BACKGROUND, stableSeed, 0.08);
+    return this.mixColors(uniqueColors.map((color) => this.stablePerturbColor(color, stableSeed, 0.08)));
   }
 
-  perturbColor(hex, tolerance = 0.02) {
+  stablePerturbColor(hex, seed = '', tolerance = 0.08) {
     const rgb = this.hexToRgb(hex);
     const delta = Math.round(255 * tolerance);
     const perturbed = {
-      r: this.clamp(rgb.r + Math.round((Math.random() * 2 - 1) * delta), 0, 255),
-      g: this.clamp(rgb.g + Math.round((Math.random() * 2 - 1) * delta), 0, 255),
-      b: this.clamp(rgb.b + Math.round((Math.random() * 2 - 1) * delta), 0, 255)
+      r: this.clamp(rgb.r + this.stableOffset(`${hex}-${seed}-r`, delta), 0, 255),
+      g: this.clamp(rgb.g + this.stableOffset(`${hex}-${seed}-g`, delta), 0, 255),
+      b: this.clamp(rgb.b + this.stableOffset(`${hex}-${seed}-b`, delta), 0, 255)
     };
     return this.rgbToHex(perturbed);
+  }
+
+  stableOffset(key, delta) {
+    const hash = this.hashString(key);
+    const normalized = hash / 0xFFFFFFFF;
+    return Math.round(normalized * 2 * delta - delta);
+  }
+
+  hashString(str) {
+    let hash = 2166136261;
+    for (let i = 0; i < str.length; i += 1) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 16777619) >>> 0;
+    }
+    return hash;
+  }
+
+  getSceneColorSeed() {
+    try {
+      const key = 'theaSceneColorSeed';
+      let seed = localStorage.getItem(key);
+      if (!seed) {
+        seed = `user-${Math.round(Date.now() * Math.random())}-${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(key, seed);
+      }
+      return seed;
+    } catch (err) {
+      return 'default';
+    }
   }
 
   mixColors(colors) {
