@@ -1071,6 +1071,10 @@ class OldPondApp {
   }
 
   getSceneBackground(lines, counts = {}) {
+    if (counts.sun && counts.moon) {
+      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f']);
+    }
+
     const text = `${lines.join(' ')} ${Object.keys(counts).filter((type) => counts[type] > 0).join(' ')}`.toLowerCase();
     const colors = BACKGROUND_RULES
       .filter((rule) => rule.keywords.some((keyword) => text.includes(keyword)))
@@ -1084,6 +1088,10 @@ class OldPondApp {
       total[item.type] = (total[item.type] || 0) + 1;
       return total;
     }, {});
+
+    if (counts.sun && counts.moon) {
+      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f']);
+    }
 
     const words = [];
     if (counts.cloud) words.push('grey');
