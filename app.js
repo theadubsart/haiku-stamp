@@ -1111,8 +1111,19 @@ class OldPondApp {
   createSceneColor(colors) {
     const uniqueColors = [...new Set(colors)];
 
-    if (!uniqueColors.length) return DEFAULT_SCENE_BACKGROUND;
-    return this.mixColors(uniqueColors);
+    if (!uniqueColors.length) return this.perturbColor(DEFAULT_SCENE_BACKGROUND);
+    return this.mixColors(uniqueColors.map((color) => this.perturbColor(color, 0.08)));
+  }
+
+  perturbColor(hex, tolerance = 0.02) {
+    const rgb = this.hexToRgb(hex);
+    const delta = Math.round(255 * tolerance);
+    const perturbed = {
+      r: this.clamp(rgb.r + Math.round((Math.random() * 2 - 1) * delta), 0, 255),
+      g: this.clamp(rgb.g + Math.round((Math.random() * 2 - 1) * delta), 0, 255),
+      b: this.clamp(rgb.b + Math.round((Math.random() * 2 - 1) * delta), 0, 255)
+    };
+    return this.rgbToHex(perturbed);
   }
 
   mixColors(colors) {
