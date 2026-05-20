@@ -24,16 +24,16 @@ const NUMBER_WORDS = ['No', 'A', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
 const DEFAULT_SCENE_BACKGROUND = '#efefe8';
 
 const BACKGROUND_RULES = [
-  { keywords: ['moon'], color: '#151B36' },
-  { keywords: ['grey'], color: '#A5A5A5' },
-  { keywords: ['autumn'], color: '#f79546' },
-  { keywords: ['sky'], color: '#3F4972' },
-  { keywords: ['morning'], color: '#5EA0E6' },
-  { keywords: ['hot', 'scalding'], color: '#D7C500' },
-  { keywords: ['snow', 'snowfall', 'snowflakes', 'white'], color: '#C1CFDF' },
-  { keywords: ['forest', 'branches'], color: '#489C88' },
-  { keywords: ['rain', 'drops'], color: '#818CA0' },
-  { keywords: ['fog', 'mist', 'haze'], color: '#B18BBA' }
+  { types: ['moon'], color: '#151B36' },
+  { types: ['cloud'], color: '#A5A5A5' },
+  { types: ['falling-leaves'], color: '#D86F20' },
+  { types: ['star'], color: '#3F4972' },
+  { types: ['sun'], color: '#5EA0E6', condition: (counts) => counts.sun === 1 },
+  { types: ['sun'], color: '#D7C500', condition: (counts) => counts.sun > 1 },
+  { types: ['snow'], color: '#C1CFDF' },
+  { types: ['tree'], color: '#489C88' },
+  { types: ['rain'], color: '#818CA0' },
+  { types: ['fog'], color: '#B18BBA' }
 ];
 
 const POEM_RULES = {
@@ -1073,17 +1073,16 @@ class OldPondApp {
   }
 
   getSceneBackground(lines, counts = {}, seed = this.userSceneColorSeed) {
-    const text = `${lines.join(' ')} ${Object.keys(counts).filter((type) => counts[type] > 0).join(' ')}`.toLowerCase();
-
     if (counts.sun && counts.moon) {
       return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f'].map((color) => this.stablePerturbColor(color, seed, 0.08)));
     }
 
+    const sceneSeed = `${seed}-${Object.entries(counts).sort().map(([type, count]) => `${type}:${count}`).join(';')}`;
     const colors = BACKGROUND_RULES
-      .filter((rule) => rule.keywords.some((keyword) => text.includes(keyword)))
+      .filter((rule) => rule.types.some((type) => counts[type] > 0) && (!rule.condition || rule.condition(counts)))
       .map((rule) => rule.color);
 
-    return this.createSceneColor(colors, seed);
+    return this.createSceneColor(colors, sceneSeed);
   }
 
   getSceneBackgroundForScene(scene) {
@@ -1094,23 +1093,7 @@ class OldPondApp {
 
     const seed = scene.backgroundSeed || this.userSceneColorSeed;
 
-    if (counts.sun && counts.moon) {
-      return this.mixColors(['#f3a25a', '#b96db7', '#f1c96f'].map((color) => this.stablePerturbColor(color, seed, 0.08)));
-    }
-
-    const words = [];
-    if (counts.cloud) words.push('grey');
-    if (counts['falling-leaves']) words.push('autumn');
-    if (counts.star) words.push('sky');
-    if (counts.moon) words.push('moon');
-    if (counts.sun === 1) words.push('morning');
-    if (counts.sun > 1) words.push('hot');
-    if (counts.snow) words.push('snow');
-    if (counts.tree) words.push('forest branches');
-    if (counts.rain) words.push('rain');
-    if (counts.fog) words.push('fog');
-
-    return this.getSceneBackground(words, counts, seed);
+    return this.getSceneBackground([], counts, seed);
   }
 
   createSceneColor(colors, seed) {
@@ -1121,7 +1104,7 @@ class OldPondApp {
     return this.mixColors(uniqueColors.map((color) => this.stablePerturbColor(color, stableSeed, 0.08)));
   }
 
-  stablePerturbColor(hex, seed = '', tolerance = 0.08) {
+  stablePerturbColor(hex, seed = '', tolerance = 0.05) {
     const rgb = this.hexToRgb(hex);
     const delta = Math.round(255 * tolerance);
     const perturbed = {
