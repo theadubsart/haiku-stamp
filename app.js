@@ -1206,7 +1206,7 @@ class OldPondApp {
 
   getAssetSize(type) {
     if (type === 'star') return 32;
-    if (type === 'tree') return 184;
+    if (type === 'tree') return 150;
     if (type === 'fog') return 312;
     return type === 'frog' ? 62 : 64;
   }

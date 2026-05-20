@@ -958,8 +958,8 @@ textarea{
 }
 
 .canvas-item[data-type="tree"]{
-  width: 184px;
-  height: 184px;
+  width: 150px;
+  height: 150px;
 }
 
 .canvas-item[data-type="fog"]{
