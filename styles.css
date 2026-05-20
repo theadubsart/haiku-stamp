@@ -203,10 +203,103 @@ body{
 }
 
 .project-copy p{
-  margin: 0 auto 16px;
-  max-width: 620px;
+  margin: 0 0 24px;
+  max-width: 740px;
   font-size: 18px;
-  line-height: 1.62;
+  line-height: 1.78;
+  color: #262626;
+}
+
+.project-page{
+  background: #f5f2e9;
+}
+
+.project-copy{
+  width: min(900px, 92vw);
+  margin: 0 auto 0;
+  text-align: left;
+  padding: 40px 40px 28px;
+}
+
+.project-copy h1{
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.project-kicker{
+  margin: 0 0 34px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #5a5a5a;
+  font-weight: 600;
+}
+
+.project-poem-title{
+  margin: 32px 0 18px 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #111;
+}
+
+.project-haiku{
+  margin: 0 0 18px;
+  padding: 22px 24px;
+  border-left: 4px solid #222;
+}
+
+.project-haiku p{
+  margin: 0 0 10px;
+  font-size: 20px;
+  line-height: 1.45;
+  color: #111;
+}
+
+.project-haiku p:last-child{
+  margin-bottom: 0;
+}
+
+.project-copy .poem-credit{
+  margin: 0 0 30px;
+  color: #6a6a6a;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.participation-section{
+  width: min(900px, 92vw);
+  margin: 48px auto 0;
+  padding: 44px 38px;
+  background: #323f66;
+  color: #f3f5ff;
+}
+
+.participation-copy h2{
+  margin: 0 0 26px;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.participation-copy p{
+  margin: 0 0 20px;
+  max-width: 680px;
+  font-size: 16px;
+  line-height: 1.78;
+  color: rgba(255,255,255,0.92);
+}
+
+.participation-credit{
+  margin-top: 24px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
 }
 
 .steps{
