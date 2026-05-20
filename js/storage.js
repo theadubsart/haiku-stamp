@@ -19,7 +19,10 @@ function loadArchive() {
   ARCHIVE_REF.on("value", (snapshot) => {
     const data = snapshot.val();
 
-    archiveData = data ? Object.values(data) : [];
+    // Preserve the Firebase key as `id` on loaded entries when not present.
+    archiveData = data
+      ? Object.entries(data).map(([key, val]) => Object.assign({}, val || {}, { id: (val && val.id) ? val.id : key }))
+      : [];
 
     archiveData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 

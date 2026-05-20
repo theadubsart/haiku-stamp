@@ -140,6 +140,8 @@ class OldPondApp {
     this.archiveModalClose = document.getElementById('archiveModalClose');
     this.archiveModalBackdrop = document.getElementById('archiveModalBackdrop');
     this.archiveShareBtn = document.getElementById('archiveShareBtn');
+    // If a `scene` query param is present, remember it and open after archive loads
+    this.requestedSceneId = new URL(location.href).searchParams.get('scene');
     this.publishModal = document.getElementById('publishModal');
     this.publishForm = document.getElementById('publishForm');
     this.sceneTitleInput = document.getElementById('sceneTitleInput');
@@ -148,6 +150,8 @@ class OldPondApp {
     this.haikuLine1 = document.getElementById('haikuLine1');
     this.haikuLine2 = document.getElementById('haikuLine2');
     this.haikuLine3 = document.getElementById('haikuLine3');
+    this.contentWrapper = document.querySelector('.content-wrapper');
+    this.appContainer = document.querySelector('.app-container');
     this.assetMap = new Map(ASSET_DEFINITIONS.map((asset) => [asset.type, asset]));
     this.canvasItems = [];
     this.waterShapes = [];
@@ -771,10 +775,29 @@ class OldPondApp {
       button.append(scene, meta);
       this.archiveGrid.appendChild(button);
     });
+
+    // Debug: log archive ids and requested scene id
+    try {
+      console.debug('renderArchive: requestedSceneId=', this.requestedSceneId);
+      console.debug('renderArchive: archive ids=', this.archiveEntries.map((e) => e && e.id));
+    } catch (err) { /* ignore */ }
+
+    // If a `scene` query param was present when the app loaded, open that archive entry
+    // Wait until we have at least one archive entry before attempting to match.
+    if (this.requestedSceneId && this.archiveEntries.length > 0) {
+      const foundIndex = this.archiveEntries.findIndex((e) => e && e.id === this.requestedSceneId);
+      if (foundIndex !== -1) {
+        this.showArchive();
+        window.setTimeout(() => this.openArchiveModal(this.archiveEntries[foundIndex], foundIndex), 80);
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch (err) { /* ignore */ }
+        this.requestedSceneId = null;
+      }
+    }
   }
 
   openArchiveModal(entry, index) {
     if (!this.archiveModal) return;
+    try { console.debug('openArchiveModal:', entry && entry.id, 'index:', index); } catch (e) {}
     this.currentArchiveEntry = entry;
     this.archiveModalTitle.textContent = entry.title || `Pond ${index + 1}`;
     this.archiveModalPoem.innerHTML = '';
@@ -786,11 +809,43 @@ class OldPondApp {
     this.archiveModalDate.textContent = this.formatDate(entry.createdAt);
     this.archiveModalScene.innerHTML = '';
     this.renderScenePreview(this.archiveModalScene, entry.scene, true);
+    // apply modal background color to match scene
+    try {
+      const sceneColor = this.getSceneBackgroundForScene(entry.scene);
+      const modalCard = this.archiveModal.querySelector('.modal-card');
+      if (modalCard) modalCard.style.background = sceneColor;
+      // set copy area text color for contrast
+      const isDark = this.isDarkColor(sceneColor);
+      const copyArea = this.archiveModal.querySelector('.archive-modal-copy');
+      if (copyArea) copyArea.classList.toggle('dark-scene', isDark);
+    } catch (err) { /* ignore */ }
     this.archiveModal.classList.remove('hidden');
     if (this.archiveShareBtn) {
       this.archiveShareBtn.textContent = 'Share';
       this.archiveShareBtn.classList.remove('copied');
     }
+  }
+
+  isDarkColor(hex) {
+    try {
+      const rgb = this.hexToRgb(hex || '#000000');
+      const lum = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+      return lum < 0.5;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  applySceneColorToWrapper(hex) {
+    try {
+      if (this.appContainer) this.appContainer.style.background = hex;
+      const isDark = this.isDarkColor(hex);
+      if (this.contentWrapper) this.contentWrapper.classList.toggle('dark-scene', isDark);
+      if (this.appContainer) this.appContainer.classList.toggle('dark-scene', isDark);
+      // ensure poem text color updates
+      const haikuText = this.contentWrapper?.querySelector('.haiku-text');
+      if (haikuText) haikuText.classList.toggle('dark-scene', isDark);
+    } catch (err) { /* ignore */ }
   }
 
   closeArchiveModal() {
@@ -860,7 +915,9 @@ class OldPondApp {
     this.haikuLine2.textContent = lines[1];
     this.haikuLine3.textContent = lines[2];
     this.haikuLine1.classList.toggle('is-placeholder', !hasSceneContent);
-    this.canvas.style.setProperty('--scene-color', hasSceneContent ? this.getSceneBackground(lines, counts) : DEFAULT_SCENE_BACKGROUND);
+    const sceneColor = hasSceneContent ? this.getSceneBackground(lines, counts) : DEFAULT_SCENE_BACKGROUND;
+    this.canvas.style.setProperty('--scene-color', sceneColor);
+    this.applySceneColorToWrapper(sceneColor);
     this.canvas.classList.toggle('has-rain', (counts.rain || 0) > 0);
   }
 
