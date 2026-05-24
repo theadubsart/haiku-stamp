@@ -765,7 +765,7 @@ class OldPondApp {
 
       const scene = document.createElement('div');
       scene.className = 'archive-card-visual scene-preview';
-      this.renderScenePreview(scene, entry.scene, false);
+      this.renderScenePreview(scene, entry.scene, false, true);
 
       const meta = document.createElement('div');
       meta.className = 'archive-card-meta';
@@ -810,7 +810,7 @@ class OldPondApp {
     });
     this.archiveModalDate.textContent = this.formatDate(entry.createdAt);
     this.archiveModalScene.innerHTML = '';
-    this.renderScenePreview(this.archiveModalScene, entry.scene, true);
+    this.renderScenePreview(this.archiveModalScene, entry.scene, true, true);
     // apply modal background color to match scene
     try {
       const sceneColor = this.getSceneBackgroundForScene(entry.scene);
@@ -854,7 +854,10 @@ class OldPondApp {
     this.archiveModal?.classList.add('hidden');
   }
 
-  renderScenePreview(container, scene, large) {
+  renderScenePreview(container, scene, large, interactive = false) {
+    if (!container.style.position) {
+      container.style.position = 'relative';
+    }
     container.style.setProperty('--scene-color', this.getSceneBackgroundForScene(scene));
     container.classList.toggle('has-rain', this.sceneHasRain(scene));
     container.style.aspectRatio = `${scene.width || 668} / ${scene.height || 484}`;
@@ -890,6 +893,57 @@ class OldPondApp {
       el.innerHTML = this.createAssetImage(asset);
       container.appendChild(el);
     });
+
+    if (interactive) {
+      this.enableArchiveCursorAvoidance(container);
+    }
+  }
+
+  enableArchiveCursorAvoidance(container) {
+    if (container._archiveAvoidanceBound) return;
+
+    const getAvoidableItems = () => Array.from(container.querySelectorAll('.preview-item')).filter((item) => {
+      return ['frog', 'insect', 'fish'].includes(item.dataset.type);
+    });
+
+    const resetAvoidance = () => {
+      getAvoidableItems().forEach((item) => {
+        item.style.transform = '';
+      });
+    };
+
+    const handlePointerMove = (event) => {
+      const rect = container.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left;
+      const pointerY = event.clientY - rect.top;
+      const threshold = 260;
+      const maxOffset = 90;
+
+      getAvoidableItems().forEach((item) => {
+        const itemRect = item.getBoundingClientRect();
+        const centerX = itemRect.left + itemRect.width / 2 - rect.left;
+        const centerY = itemRect.top + itemRect.height / 2 - rect.top;
+        const dx = centerX - pointerX;
+        const dy = centerY - pointerY;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance < threshold && distance > 1) {
+          const strength = Math.min(1, Math.pow((threshold - distance) / threshold, 2));
+          const offset = Math.max(24, Math.min(maxOffset, strength * maxOffset));
+          const translateX = (dx / distance) * offset;
+          const translateY = (dy / distance) * offset;
+          item.style.transform = `translate(${translateX}px, ${translateY}px)`;
+          item.style.transition = 'transform 0.08s ease-out';
+        } else {
+          item.style.transform = '';
+          item.style.transition = 'transform 0.18s ease-out';
+        }
+      });
+    };
+
+    container.addEventListener('pointermove', handlePointerMove);
+    container.addEventListener('pointerleave', resetAvoidance);
+    container._archiveAvoidanceBound = true;
   }
 
   randomizePreviewMotion(element, liveMove) {
