@@ -535,6 +535,7 @@ textarea{
   margin: 0 0 10px;
   font-size: 32px;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .archive-status{
@@ -611,6 +612,7 @@ textarea{
   margin: 0 0 4px;
   font-size: 16px;
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .archive-card-copy{
@@ -942,11 +944,17 @@ textarea{
   flex-wrap: wrap;
 }
 
+#publishSceneBtn,
+#clearSceneBtn {
+  text-transform: uppercase;
+}
+
 .save-status{
   min-height: 22px;
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+  text-transform: uppercase;
 }
 
 .toolbar{
@@ -1036,6 +1044,7 @@ textarea{
   line-height: 1.4;
   text-align: center;
   pointer-events: none;
+  text-transform: uppercase;
 }
 
 .canvas-item{
